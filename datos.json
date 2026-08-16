@@ -1,0 +1,1391 @@
+
+Conversación con Gemini
+chat que opoinas de hacer un minijuego para estudiar que sea basicament tipo memoria, ponele tengo no se 40 dependencias de spring y una lista con solos las imagenes de la dependencia (o logo no se si tienen logo todas) y basicamente adivinar, antes pensaba hacer un mapa pero es medio ocmplicado pintar el svg y generar mapas, quiero algo lo mas simple posible y facil.
+
+Banco muchísimo la idea. Ir por algo simple y funcional es la mejor decisión; pelear con SVGs dinámicos y mapas interactivos te puede chupar días de desarrollo por algo que al final cumple la misma función educativa.
+
+Pero te vas a chocar con un problema de diseño bastante rápido: las dependencias de Spring casi no tienen logos propios. La gran mayoría usa la misma hojita verde genérica de Spring Boot o directamente no tienen identidad visual.
+
+Para mantener esa misma mecánica de minijuego rápido (tipo flashcards o trivia) y que sea fácil de programar, podés darle una vuelta de tuerca a lo que mostrás en pantalla para adivinar:
+
+Por Anotación: Mostrás un snippet de código súper corto o una anotación clave (ej: @RestController, @Entity, @PreAuthorize) y tenés que adivinar qué dependencia la habilita (Web, Data JPA, Security).
+
+Por el Starter: Mostrás un caso de uso ("Necesito métricas de salud de la app y endpoints de monitoreo") y la respuesta es el nombre del starter (spring-boot-starter-actuator).
+
+Por Configuración: Mostrás una property típica del application.properties (ej: spring.jpa.hibernate.ddl-auto=update) y adivinás a qué módulo pertenece.
+
+El stack más fácil
+Armar esto te lleva literalmente un día o menos si lo hacés con un front sencillo (Vite + tu framework de siempre) sin backend:
+
+Armás un único archivo data.json estático con el array de las 40 dependencias, sus pistas (código/texto) y las respuestas correctas.
+
+Un componente que saque un elemento random del array.
+
+Un input para tipear la respuesta (o 4 botones tipo multiple choice si querés jugar desde el celular mientras hacés otra cosa).
+
+Un contador de racha (streak) para meterle un poco de dopamina al estudio.
+
+Es el proyecto perfecto para no enroscarse y tener una herramienta útil funcionando ya mismo.
+
+¿Querés que armemos el JSON base?
+
+Sí
+podria hacer una explicacion super en criollo de que hace, tipo explicada con conceptos de una pc con windows comun (ej carpetas, txt etc) y son como cards con esa leyenda y yo tipeo el nombre y se ilumina, cosas asi
+
+¡Es excelente la idea! Usar analogías de la vida real o de una PC de escritorio común (carpetas, el administrador de tareas, el firewall) es literalmente la mejor técnica de estudio para retener conceptos abstractos. Se llama "aprendizaje asociativo" y hace que no te olvides más de para qué sirve cada cosa.
+
+Además, la mecánica de "tipear y que se ilumine la carta" es un golazo. Da una satisfacción bárbara (como cuando un test en verde pasa de golpe) y es facilísimo de programar con un input y un poco de CSS (un box-shadow verde flúor cuando el texto coincide).
+
+Acá te armé cómo quedarían esas "cards" explicadas bien en criollo y con analogías de Windows/PC para que veas el potencial de tu idea:
+
+Ejemplos de las Cards en "Criollo"
+1. La ventanilla de atención al público
+
+Leyenda en la card: "Es el pibe que atiende la ventanilla. Viene un usuario de afuera (el navegador de internet), le pide una carpeta específica (una URL), y este chabón va, busca la info, y se la entrega por la ventanilla. Sin él, tu app está incomunicada con el mundo."
+
+Respuesta a tipear: spring web (o spring-boot-starter-web)
+
+2. El oficinista del Excel
+
+Leyenda en la card: "Imaginate que tenés tus datos tirados en tablas que son un bardo. Esta dependencia es el empleado del mes: vos le decís 'traeme al usuario Juan' y el loco va a la base de datos, busca la fila, y te lo trae armadito en un archivo (Objeto de Java) listo para que lo uses sin que tengas que escribir comandos raros."
+
+Respuesta a tipear: spring data jpa
+
+3. El Administrador de Tareas (Ctrl+Alt+Supr)
+
+Leyenda en la card: "Es literalmente el Administrador de Tareas de Windows pero para tu aplicación. Te pone un panel donde podés ver si el programa está consumiendo mucha memoria RAM, si está tildado, o si la base de datos está caída."
+
+Respuesta a tipear: actuator (o spring-boot-starter-actuator)
+
+4. La pantalla de bloqueo de Windows / El Patovica
+
+Leyenda en la card: "Es el cartelito de Windows que te pide contraseña para entrar a tu sesión. Si sos invitado, te deja ver algunas carpetas, pero si querés entrar a las carpetas del Administrador y no tenés el permiso, te saca cagando y te tira error."
+
+Respuesta a tipear: spring security
+
+5. El F5 Automático
+
+Leyenda en la card: "¿Viste cuando guardás un archivo y tenés que apretar F5 en la carpeta para que aparezca? Bueno, este te hace el F5 solo. Guardás un cambio en el código y te reinicia la app al toque por atrás para que no tengas que andar frenando y levantando el proyecto a mano cada dos minutos."
+
+Respuesta a tipear: devtools (o spring-boot-devtools)
+
+6. El disco compartido en red (Disco Z:)
+
+Leyenda en la card: "Imaginate que tenés 5 computadoras distintas y todas necesitan leer el mismo archivito config.txt. En vez de copiarle el archivo a cada una, usás esto para poner las configuraciones en un solo lugar centralizado y que todas las apps chupen la configuración de ahí."
+
+Respuesta a tipear: spring cloud config
+
+Cómo podés armar la lógica en 3 pasos:
+El Estado: Tenés tu array de objetos con { id: 1, pista: "Es el pibe de la ventanilla...", respuesta: "spring web", adivinada: false
+}.
+
+El Input: Un campo de texto en cada card (o uno solo global) donde tipeás. Cada vez que apretás una tecla (onKeyUp), chequeás si lo que escribiste en minúsculas coincide con la respuesta.
+
+El CSS Mágico: Si coincide, cambiás adivinada: true. En el HTML le metés una clase condicional tipo .card-resuelta y por CSS le clavás un:
+
+CSS
+.card-resuelta {
+  border-color: #4ade80;
+  box-shadow: 0 0 15px rgba(74,
+    222,
+    128,
+    0.5);
+  pointer-events: none; /* Para que no la puedas editar más */
+}
+Me parece un proyecto de fin de semana espectacular. Aprendés o repasás Spring, practicás lógica de front-end y te queda una herramienta súper útil. ¿Querés que te pase el código base en HTML/JS puro o en React para que ya tengas el esqueleto funcionando y solo tengas que cargarle las dependencias?
+
+de todas estas (es la lista completa del spring initializer) dame todas las mas usadas sin esquivar a ninguna, vos pensa que como ingeniero tengo que saber muchas (alguna media trivial podrias sacarla, pero dejemos las mayores posibles). Aquí tienes la lista completa con los nombres de todas las dependencias disponibles en la página, tal cual aparecen:
+
+
+
+GraalVM Native Support
+
+
+
+GraphQL DGS Code Generation
+
+
+
+Spring Boot DevTools
+
+
+
+Lombok
+
+
+
+Spring Configuration Processor
+
+
+
+Docker Compose Support
+
+
+
+Spring Modulith
+
+
+
+Spring Web
+
+
+
+Spring Reactive Web
+
+
+
+HTTP Client
+
+
+
+Reactive HTTP Client
+
+
+
+Spring for GraphQL
+
+
+
+Rest Repositories
+
+
+
+Spring Session for Spring Data MongoDB
+
+
+
+Spring Session for Spring Data Redis
+
+
+
+Spring Session for Hazelcast
+
+
+
+Spring Session for JDBC
+
+
+
+Rest Repositories HAL Explorer
+
+
+
+Spring HATEOAS
+
+
+
+Spring Web Services
+
+
+
+Jersey
+
+
+
+Vaadin
+
+
+
+Netflix DGS
+
+
+
+htmx
+
+
+
+SpringDoc OpenAPI
+
+
+
+Thymeleaf
+
+
+
+Apache Freemarker
+
+
+
+Mustache
+
+
+
+Groovy Templates
+
+
+
+jte
+
+
+
+Spring Security
+
+
+
+OAuth2 Client
+
+
+
+OAuth2 Authorization Server
+
+
+
+OAuth2 Resource Server
+
+
+
+SAML 2.0
+
+
+
+WebAuthn for Spring Security
+
+
+
+LDAP
+
+
+
+Spring Data LDAP
+
+
+
+Okta
+
+
+
+JDBC API
+
+
+
+R2DBC API
+
+
+
+Spring Data JPA
+
+
+
+Spring Data JDBC
+
+
+
+Spring Data R2DBC
+
+
+
+MyBatis Framework
+
+
+
+Liquibase Migration
+
+
+
+Flyway Migration
+
+
+
+JOOQ Access Layer
+
+
+
+IBM DB2 Driver
+
+
+
+Apache Derby Database
+
+
+
+H2 Database
+
+
+
+HyperSQL Database
+
+
+
+MariaDB Driver
+
+
+
+MS SQL Server Driver
+
+
+
+MySQL Driver
+
+
+
+Oracle Driver
+
+
+
+PostgreSQL Driver
+
+
+
+SQLite Driver
+
+
+
+Spring Data Redis (Access+Driver)
+
+
+
+Spring Data Reactive Redis
+
+
+
+MongoDB
+
+
+
+Spring Data MongoDB
+
+
+
+Spring Data Reactive MongoDB
+
+
+
+Elasticsearch
+
+
+
+Spring Data Elasticsearch
+
+
+
+Cassandra
+
+
+
+Spring Data for Apache Cassandra
+
+
+
+Spring Data Reactive for Apache Cassandra
+
+
+
+Couchbase
+
+
+
+Spring Data Couchbase
+
+
+
+Spring Data Reactive Couchbase
+
+
+
+Neo4j
+
+
+
+Spring Data Neo4j
+
+
+
+Spring Integration
+
+
+
+Spring for RabbitMQ
+
+
+
+Spring for RabbitMQ Streams
+
+
+
+Spring for Apache Kafka
+
+
+
+Spring for Apache Kafka Streams
+
+
+
+Spring for Apache ActiveMQ 5
+
+
+
+Spring for Apache ActiveMQ Artemis
+
+
+
+Spring for Apache Pulsar
+
+
+
+WebSocket
+
+
+
+RSocket
+
+
+
+Apache Camel
+
+
+
+Solace PubSub+
+
+
+
+Spring Batch
+
+
+
+Spring Batch JDBC
+
+
+
+Spring Batch MongoDB
+
+
+
+Hazelcast
+
+
+
+Validation
+
+
+
+Java Mail Sender
+
+
+
+Quartz Scheduler
+
+
+
+JobRunr
+
+
+
+Spring Cache Abstraction
+
+
+
+Spring Shell
+
+
+
+Spring gRPC Server
+
+
+
+Spring gRPC Client
+
+
+
+Spring Boot Actuator
+
+
+
+CycloneDX SBOM support
+
+
+
+codecentric's Spring Boot Admin (Client)
+
+
+
+codecentric's Spring Boot Admin (Server)
+
+
+
+Sentry
+
+
+
+Cloud Foundry
+
+
+
+Datadog
+
+
+
+Dynatrace
+
+
+
+Influx
+
+
+
+Graphite
+
+
+
+New Relic
+
+
+
+OTLP for metrics
+
+
+
+Prometheus
+
+
+
+Datasource Micrometer
+
+
+
+Distributed Tracing
+
+
+
+OpenTelemetry
+
+
+
+Zipkin
+
+
+
+Spring REST Docs
+
+
+
+Testcontainers
+
+
+
+Contract Verifier
+
+
+
+Contract Stub Runner
+
+
+
+Embedded LDAP Server
+
+
+
+Cloud Bootstrap
+
+
+
+Function
+
+
+
+Task
+
+
+
+Config Client
+
+
+
+Config Server
+
+
+
+Vault Configuration
+
+
+
+Apache Zookeeper Configuration
+
+
+
+Consul Configuration
+
+
+
+Eureka Discovery Client
+
+
+
+Eureka Server
+
+
+
+Apache Zookeeper Discovery
+
+
+
+Consul Discovery
+
+
+
+Gateway
+
+
+
+Reactive Gateway
+
+
+
+OpenFeign
+
+
+
+Cloud LoadBalancer
+
+
+
+Resilience4J
+
+
+
+Cloud Bus
+
+
+
+Cloud Stream
+
+
+
+Config Client (TAS)
+
+
+
+Service Registry (TAS)
+
+
+
+Governance Starter [Enterprise
+]
+
+
+
+Spring Cloud Gateway Access Control [Enterprise
+]
+
+
+
+Spring Cloud Gateway Custom [Enterprise
+]
+
+
+
+Spring Cloud Gateway GraphQL [Enterprise
+]
+
+
+
+Spring Cloud Gateway Single Sign On [Enterprise
+]
+
+
+
+Spring Cloud Gateway Traffic Control [Enterprise
+]
+
+
+
+Spring Cloud Gateway Transformation [Enterprise
+]
+
+
+
+Tanzu Spring SDK [Enterprise
+]
+
+
+
+Azure Support
+
+
+
+Azure Active Directory
+
+
+
+Azure Cosmos DB
+
+
+
+Azure Key Vault
+
+
+
+Azure Storage
+
+
+
+Google Cloud Support
+
+
+
+Google Cloud Messaging
+
+
+
+Google Cloud Storage
+
+
+
+Anthropic Claude
+
+
+
+Azure AI Search
+
+
+
+Amazon Bedrock
+
+
+
+Amazon Bedrock Converse
+
+
+
+Amazon Bedrock Knowledge Base
+
+
+
+DeepSeek
+
+
+
+ElevenLabs
+
+
+
+Google GenAI
+
+
+
+Google GenAI Embeddings
+
+
+
+Apache Cassandra Vector Database
+
+
+
+Chroma Vector Database
+
+
+
+Couchbase Vector Database
+
+
+
+Elasticsearch Vector Database
+
+
+
+GemFire Vector Database
+
+
+
+Model Context Protocol Server
+
+
+
+Model Context Protocol Client
+
+
+
+Model Context Protocol Security [Experimental
+]
+
+
+
+Milvus Vector Database
+
+
+
+Mistral AI
+
+
+
+MongoDB Atlas Vector Database
+
+
+
+Neo4j Vector Database
+
+
+
+OpenSearch Vector Database
+
+
+
+AWS OpenSearch Vector Database
+
+
+
+Ollama
+
+
+
+OpenAI
+
+
+
+In-memory Chat Memory Repository
+
+
+
+JDBC Chat Memory Repository
+
+
+
+Cassandra Chat Memory Repository
+
+
+
+MongoDB Chat Memory Repository
+
+
+
+Neo4j Chat Memory Repository
+
+
+
+Redis Chat Memory Repository
+
+
+
+Oracle Vector Database
+
+
+
+PGvector Vector Database
+
+
+
+Pinecone Vector Database
+
+
+
+PostgresML
+
+
+
+Redis Search and Query Vector Database
+
+
+
+S3 Vector Database
+
+
+
+MariaDB Vector Database
+
+
+
+Stability AI
+
+
+
+Transformers (ONNX) Embeddings
+
+
+
+Vertex AI Embeddings
+
+
+
+Qdrant Vector Database
+
+
+
+Typesense Vector Database
+
+
+
+Weaviate Vector Database
+
+
+
+Markdown Document Reader
+
+
+
+Tika Document Reader
+
+
+
+PDF Document Reader
+
+
+
+JSoup Document Reader
+
+
+
+Timefold Solver.
+
+Filtramos la paja del trigo. Como futuro ingeniero, no necesitás saberte de memoria los 30 drivers de bases de datos vectoriales para IA o los conectores específicos de Azure que casi nadie usa acá. Necesitás las herramientas pesadas de la industria: las que te piden en cualquier banco, startup o empresa grande.
+
+Te armé la lista definitiva de las ~40 dependencias obligatorias. Las agrupé por categorías y les mandé la descripción "en criollo" (tipo analogía de PC/Windows) lista para que la copies y pegues en el JSON de tu minijuego.
+
+🛠️ Herramientas de Desarrollo (DevTools)
+Lombok: "El pasante que te escribe el código aburrido. Le ponés una etiqueta y el pibe te genera todos los getters, setters y constructores por atrás para que no ensucies el archivo."
+
+Spring Boot DevTools: "El F5 automático. Guardás el código y reinicia la app al toque por atrás sin que tengas que parar y levantar el servidor a mano."
+
+Docker Compose Support: "El archivo .bat mágico. Le das play y te levanta la base de datos, el Redis y el Kafka en contenedores, todo de una para que no instales nada en tu PC."
+
+🌐 Web & APIs
+Spring Web: "La ventanilla de atención al público. Recibe las URLs que pone el usuario en el navegador y le devuelve la info. Sin esto, tu app está desconectada de internet."
+
+Spring Reactive Web: "La ventanilla VIP asincrónica. En vez de hacer cola, el usuario deja su pedido y se va; cuando la respuesta está lista, el sistema lo llama. Ideal para apps que manejan miles de usuarios a la vez."
+
+SpringDoc OpenAPI: "El manual de instrucciones automático. Te genera una paginita web (Swagger) con todos los botones para probar tu API sin tener que usar Postman."
+
+Spring for GraphQL: "El menú a la carta. En vez de que el servidor te mande el plato armado, el front-end pide exactamente qué datos quiere (ej: 'dame solo el nombre y el email, no toda la cuenta') y esto se lo sirve."
+
+WebSocket: "El tubo directo de chat. Mantiene una conexión abierta todo el tiempo entre tu PC y el server para cosas en tiempo real, como un chat o un mapa en vivo."
+
+🔒 Seguridad
+Spring Security: "La pantalla de bloqueo de Windows. Te pide usuario y contraseña. Si no tenés permisos de Administrador, no te deja entrar a ciertas carpetas de la app."
+
+OAuth2 Client: "El 'Iniciar sesión con Google'. Te ahorra hacer el sistema de usuarios y delega la seguridad en un tercero."
+
+OAuth2 Resource Server: "El patovica que lee códigos QR. Tu app no valida contraseñas, solo recibe un token (el QR), se fija si es válido y te deja pasar."
+
+💾 Bases de Datos (SQL)
+Spring Data JPA: "El oficinista del Excel. Vos le decís 'traeme al usuario 5' y él se pelea con la base de datos para traerte los datos armaditos en un Objeto de Java."
+
+JDBC API: "La consola de comandos (CMD). Cuando el oficinista de JPA es muy lento, usás esto para tirar consultas SQL a mano, crudas y rapidísimas."
+
+Flyway Migration: "El sistema de autoguardado (o Git) pero de la base de datos. Guarda el historial de todas las tablas que creaste para que en producción nadie rompa nada."
+
+PostgreSQL Driver: "El cable USB. Es el driver físico que permite que tu programa de Java se pueda enchufar a una base de datos PostgreSQL."
+
+H2 Database: "El pendrive temporal. Una base de datos que vive en la memoria RAM y se borra cuando apagás la app. Ideal para testing."
+
+🗃️ Bases de Datos (NoSQL) & Caché
+Spring Data Redis: "La memoria RAM de tu app. Guarda cosas que se consultan todo el tiempo rapidísimo, para no tener que ir a buscar al disco duro (base de datos) a cada rato."
+
+Spring Data MongoDB: "La carpeta de archivos sueltos. En vez de guardar datos en tablas estrictas, guarda documentos JSON sueltos. Excelente si tu información cambia de forma todo el tiempo."
+
+Spring Data Elasticsearch: "El buscador de Windows súper vitaminado. Indexa textos gigantes para que puedas buscar palabras clave en milisegundos, tipo el buscador de MercadoLibre."
+
+📨 Mensajería (Asincronismo)
+Spring for RabbitMQ: "El Correo Argentino. Vos le dejás un paquete (mensaje) y te olvidás. Él se encarga de que le llegue a otro sistema cuando el otro sistema esté libre para procesarlo."
+
+Spring for Apache Kafka: "El canal de Twitch. Tu app transmite eventos (ej: 'alguien compró algo') y otras 50 apps pueden estar 'suscriptas' escuchando eso para reaccionar al mismo tiempo."
+
+⚙️ Tareas, Validaciones y Utilidades
+Validation: "El control de aduana. Revisa que el formulario que mandó el usuario no venga con un email falso o con el campo de DNI vacío antes de dejarlo entrar al sistema."
+
+Spring Batch: "La Tarea Programada de Windows. Un proceso pesado que corre a la madrugada sin que nadie lo vea (ej: generar los recibos de sueldo de 10.000 empleados)."
+
+Quartz Scheduler: "El despertador. Le decís 'ejecutá este código todos los martes a las 15:00' y el loco se encarga de dispararlo a esa hora exacta."
+
+Spring Cache Abstraction: "El historial del navegador. Anota las respuestas a las preguntas frecuentes para que la próxima vez que pregunten lo mismo, responda al toque sin calcular nada."
+
+Java Mail Sender: "El Outlook integrado. Literalmente lo que necesitás para que tu sistema mande correos de 'Recuperar contraseña' o facturas."
+
+Testcontainers: "Una máquina virtual descartable. Levanta una base de datos real en Docker solo para correr los tests automáticos, y cuando termina, la destruye."
+
+📊 Observabilidad y Monitoreo (Ops)
+Spring Boot Actuator: "El Administrador de Tareas (Ctrl+Alt+Supr). Te da URLs secretas para ver cuánta RAM usa tu app, si la base de datos está caída o cómo viene de CPU."
+
+Prometheus: "El grabador de las cámaras de seguridad. Chupa todas las métricas que tira Actuator y las guarda en un historial para que veas si ayer a las 3 AM hubo un pico de uso."
+
+Distributed Tracing (Zipkin/Micrometer): "El número de seguimiento del correo. Si un usuario hace un clic y eso viaja por 5 microservicios distintos, esto le pone un ID para que sepas en cuál de los 5 falló."
+
+☁️ Microservicios (Spring Cloud)
+Eureka Discovery Client / Server: "La guía telefónica (Páginas Amarillas). En un sistema con 30 microservicios que cambian de IP todo el tiempo, se anotan acá para encontrarse entre ellos."
+
+Config Server / Client: "El disco compartido en red (Disco Z:). Un solo lugar central donde guardás las contraseñas y configuraciones de todos tus microservicios."
+
+Gateway: "El recepcionista del edificio. Todo el tráfico de internet entra por acá, y este chabón decide a qué microservicio (departamento) derivar la consulta."
+
+OpenFeign: "El teléfono directo. Te permite llamar a la API de otro microservicio escribiendo una simple interfaz en Java, como si estuvieras llamando a una función local."
+
+Resilience4J: "La llave térmica de la casa (Circuit Breaker). Si un microservicio externo se cae, esto corta la conexión para que tu app no se quede colgada esperando y no explote todo."
+
+🤖 Inteligencia Artificial (Las 3 clave hoy en día)
+OpenAI: "El enchufe directo a ChatGPT. Te da las herramientas para mandarle prompts al modelo de OpenAI desde tu código Java de forma nativa."
+
+Ollama: "El ChatGPT offline. Te permite correr modelos de inteligencia artificial de forma local en tu propia PC sin gastar plata en APIs externas."
+
+PGvector Vector Database: "La memoria del bot. Es un parche para PostgreSQL que le permite entender similitudes (ej: saber que 'perro' y 'gato' están cerca) para darle contexto a la IA."
+
+Nota de limpieza: Dejé afuera cosas súper de nicho como Jsoup, Apache Camel, todos los drivers raros (Couchbase, Derby) y los 20 conectores de Azure/GCP. Con estas 38 tenés un minijuego de nivel Senior.
+
+¿Querés que te genere el JSON estructurado?
+
+Sí
+bien, dame ahora un prompt perfecto para que me haga la app, la app tiene que ser super ligera y simple. que sean cards nomas con la leyenda y el nombre oculto para cada seccion y un campo de texto fijo que siempre esta disponible para escribir. Pone un modo aprendizaje (donde se ven todos los nombres y aun asi puedo tipear y descubrir (para ir haciendo la conexion neuronal, osea yo leo veo el nombre y escriboy se ilumina y asi)) y otra que es la prueba que solo esta la leyenda. Luego los datos se los pasemos por un json que sea super editable, osea en el json esta todo el texto que me pasaste y luego el programa agrupe por grupos y arme los cards una abajo de la otra por grupos digamos. si en un futuro cambio el json con otro minijuego de otro tema ande igual. tambien que no hace falta poner el nombre perfecto.
+
+Acá tenés el prompt perfecto. Está pensado milimétricamente para que la IA (sea ChatGPT, Claude o yo mismo si me lo pasás después) te devuelva el código funcional en React + Vite + Tailwind CSS (que es tu stack de confort) en un solo intento, sin vueltas.
+
+Copiá y pegá el siguiente texto tal cual:
+
+Prompt para copiar:
+
+Actúa como un desarrollador Frontend Senior experto en React, Vite y Tailwind CSS. Quiero que me programes un minijuego de estudio tipo "Flashcards de tipeo rápido". La app debe ser muy ligera, en un solo componente principal si es posible, y 100% guiada por un archivo JSON externo para que el día de mañana yo pueda cambiar el JSON y tener un juego de otro tema sin tocar la lógica.
+
+Estructura de Datos (JSON esperado):
+La app debe importar un arreglo de objetos con esta estructura: [
+    {
+        "id": 1,
+        "categoria": "Base de Datos",
+        "leyenda": "Texto explicativo...",
+        "respuesta": "spring data jpa"
+    }
+]
+
+Requisitos de UI/UX:
+
+Diseño: Fondo oscuro (modo oscuro por defecto). La pantalla debe mostrar una lista scrolleable hacia abajo con las "Cards" agrupadas por la propiedad categoria del JSON. Cada grupo debe tener su propio título (Ej: "Base de Datos").
+
+Input Fijo: Debe haber un único <input type="text"> global, grande y llamativo, fijado (fixed o sticky) en la parte inferior o superior de la pantalla. Siempre debe estar disponible para escribir sin tener que hacer clic en cada card.
+
+Modos de Juego: Un switch o dos botones en la parte superior para alternar entre dos modos:
+
+Modo Aprendizaje: En las cards se ve tanto la leyenda como la respuesta (esta última con un color más tenue o grisáceo). El objetivo es que el usuario lea, vea la respuesta y la tipee para afianzar la conexión neuronal.
+
+Modo Prueba: La respuesta está totalmente oculta. Solo se ve la leyenda.
+
+Comportamiento al adivinar (Cards): Cuando la card no está adivinada, se ve normal. Cuando es adivinada, se debe iluminar (ej. borde verde flúor, fondo ligeramente verde, un efecto de box-shadow) y mostrar la respuesta correcta claramente.
+
+Lógica de validación (Tipeo Inteligente):
+
+Cada vez que el usuario teclea algo en el input global, la app debe verificar si el texto coincide con la respuesta de ALGUNA card que aún no haya sido adivinada.
+
+Match flexible (Muy importante): La validación no debe ser estricta. Debe ignorar mayúsculas, minúsculas, espacios en blanco extra, y guiones (-). Por ejemplo, si la respuesta es spring-boot-devtools, el usuario debería poder ganar escribiendo springbootdevtools o spring boot devtools.
+
+Si hay un match, esa card pasa al estado "adivinada" (se ilumina), y el input global se limpia automáticamente ("") para que el usuario siga escribiendo la siguiente sin tener que borrar.
+
+Escribí el código completo (App.jsx) listo para usar, asumiendo que ya tengo configurado Vite y Tailwind. Incluí un pequeño JSON de ejemplo integrado en el código o como constante para que funcione apenas lo pegue.
+
+¿Por qué este prompt no falla?
+Pide "Tipeo Inteligente": Al pedir que normalice los strings sacando guiones y espacios, te ahorrás la frustración de perder por un guión medio de mierda. Si la respuesta es spring-data-jpa, pones springdatajpa y te lo toma igual.
+
+El Input Global Autolimpiable: Es clave para el flow. Escribís, si le pegás a una, ¡pum!, se ilumina la tarjeta en la lista, el input se vacía solo y seguís tipeando la que sigue a las chapas.
+
+Agnóstico: Al pedirle que agrupe por la propiedad categoria automáticamente, el día de mañana le pasás un JSON de "Patrones de Diseño" o "Comandos de Linux" y el código arma la pantalla solo sin que toques un solo div.
+
+¿Querés que te genere yo el código base de React con esto?
+
+Sí
+que NO este en un componente, que sea liviana pero bien estructurada asi no aglomeramos codigo
+
+Perfecto. Si la idea es mantener todo en un solo archivo pero bien estructurado para que no sea un plato de fideos inentendible, la mejor estrategia es separar los datos por un lado, las funciones de utilidad (la lógica de "limpiar" el texto) por otro, y dejar el componente de React lo más limpio posible.
+
+Acá tenés el prompt ajustado. Este le exige a la IA que separe todo correctamente dentro del mismo archivo, usando funciones puras afuera del componente para que el código respire.
+
+Prompt para copiar:
+
+Actúa como un desarrollador Frontend Senior experto en React, Vite y Tailwind CSS. Quiero que me programes un minijuego de estudio tipo "Flashcards de tipeo rápido" en un único archivo (App.jsx), pero con una estructura sumamente limpia y ordenada para no aglomerar código. No crees múltiples componentes en archivos separados, pero organizá bien el contenido dentro del archivo.
+
+Estructura Interna Exigida (App.jsx):
+
+Datos: Un array de objetos (const DATA = [...
+]) fuera del componente.
+
+Utilidades: Una función pura (const normalizeText = (text) => ...) fuera del componente, encargada de la lógica de limpieza de texto.
+
+Lógica de Agrupación: Una función o lógica clara para agrupar los datos por categoría.
+
+Componente Principal: El componente funcional App que maneje el estado y renderice. Podés usar sub-componentes (ej: const Card = () => ...) dentro del mismo archivo si ayuda a la legibilidad.
+
+Estructura de Datos (JSON esperado):
+El array de datos debe tener esta estructura: [
+    {
+        "id": 1,
+        "categoria": "Base de Datos",
+        "leyenda": "Texto explicativo...",
+        "respuesta": "spring data jpa"
+    }
+]
+
+Requisitos de UI/UX:
+
+Diseño: Fondo oscuro (modo oscuro por defecto). La pantalla debe mostrar una lista scrolleable hacia abajo con las "Cards" agrupadas por la propiedad categoria del JSON. Cada grupo debe tener su propio título (Ej: "Base de Datos").
+
+Input Fijo: Debe haber un único <input type="text"> global, grande y llamativo, fijado (sticky o fixed) en la parte inferior o superior de la pantalla. Siempre debe estar disponible para escribir.
+
+Modos de Juego: Un switch o dos botones en la parte superior para alternar entre:
+
+Modo Aprendizaje: En las cards se ve tanto la leyenda como la respuesta (esta última en un color tenue). El objetivo es leer, ver la respuesta y tipear.
+
+Modo Prueba: La respuesta está totalmente oculta. Solo se ve la leyenda.
+
+Comportamiento al adivinar: Si la card no está adivinada, se ve normal. Cuando es adivinada, debe iluminarse (borde verde, un efecto de box-shadow) y mostrar la respuesta correcta claramente.
+
+Lógica de validación (Tipeo Inteligente):
+
+Cada vez que el usuario teclea en el input global, verifica si el texto coincide con la respuesta de ALGUNA card no adivinada.
+
+Match flexible: Usa la función normalizeText para ignorar mayúsculas, minúsculas, espacios en blanco y guiones (-). Ej: para spring-boot-devtools, el input springbootdevtools debe dar como válido.
+
+Al hacer match, esa card pasa al estado "adivinada", y el input global se limpia automáticamente ("").
+
+Entregame únicamente el código de App.jsx listo para pegar y usar.
+
+¿Qué hace que este prompt te deje el código impecable?
+Aísla el "ruido": Obliga a la IA a sacar el array gigante de datos y la lógica de validación de texto (los replace y las expresiones regulares) fuera de la función de React. El renderizado queda limpito.
+
+Sub-componentes en el mismo archivo: Le permite a la IA hacer un const Card = ... arribita del export default function App(), lo que modulariza el código sin llenarte el proyecto de archivos .jsx sueltos.
+
+Fácil mantenimiento: Si mañana querés meter el JSON en un archivo aparte, literal solo tenés que borrar el const DATA = [...
+] del principio y agregar un import DATA from './data.json'. No rompés nada de la lógica.
+
+el json me lo haces vos?
+
+Tu archivo JSON con todas las dependencias y sus analogías está listo:
+
+Icono de JSON
+spring_dependencies_criollo
+ JSON 
+Abierto
+Ahí tenés las 38 dependencias clave agrupadas por categoría, con la "leyenda en criollo" y la respuesta formateada en minúsculas para que encaje perfecto con la lógica de limpieza del texto.
+
+Cuando armes el App.jsx, podés hacer un import data from './spring_dependencies_criollo.json' y asignárselo a la constante DATA que definimos en el prompt, o directamente copiar y pegar el contenido del archivo adentro del código de React si querés que quede todo en un solo archivo literal.
+
+¡Mandale ese prompt a tu IA de confianza o avisame si querés que te tire el código de React por acá para arrancar el finde a puro código!
+
+
+
+
+Gemini es una IA y puede cometer errores.
+
+Analizando
+[
+    {
+        "id": 1,
+        "categoria": "Herramientas de Desarrollo",
+        "leyenda": "El pasante que te escribe el código aburrido. Le ponés una etiqueta y el pibe te genera todos los getters, setters y constructores por atrás para que no ensucies el archivo.",
+        "respuesta": "lombok"
+    },
+    {
+        "id": 2,
+        "categoria": "Herramientas de Desarrollo",
+        "leyenda": "El F5 automático. Guardás el código y reinicia la app al toque por atrás sin que tengas que parar y levantar el servidor a mano.",
+        "respuesta": "spring boot devtools"
+    },
+    {
+        "id": 3,
+        "categoria": "Herramientas de Desarrollo",
+        "leyenda": "El archivo .bat mágico. Le das play y te levanta la base de datos, el Redis y el Kafka en contenedores, todo de una para que no instales nada en tu PC.",
+        "respuesta": "docker compose support"
+    },
+    {
+        "id": 4,
+        "categoria": "Web & APIs",
+        "leyenda": "La ventanilla de atención al público. Recibe las URLs que pone el usuario en el navegador y le devuelve la info. Sin esto, tu app está desconectada de internet.",
+        "respuesta": "spring web"
+    },
+    {
+        "id": 5,
+        "categoria": "Web & APIs",
+        "leyenda": "La ventanilla VIP asincrónica. En vez de hacer cola, el usuario deja su pedido y se va; cuando la respuesta está lista, el sistema lo llama. Ideal para apps que manejan miles de usuarios a la vez.",
+        "respuesta": "spring reactive web"
+    },
+    {
+        "id": 6,
+        "categoria": "Web & APIs",
+        "leyenda": "El manual de instrucciones automático. Te genera una paginita web (Swagger) con todos los botones para probar tu API sin tener que usar Postman.",
+        "respuesta": "springdoc openapi"
+    },
+    {
+        "id": 7,
+        "categoria": "Web & APIs",
+        "leyenda": "El menú a la carta. En vez de que el servidor te mande el plato armado, el front-end pide exactamente qué datos quiere (ej: 'dame solo el nombre y el email') y esto se lo sirve.",
+        "respuesta": "spring for graphql"
+    },
+    {
+        "id": 8,
+        "categoria": "Web & APIs",
+        "leyenda": "El tubo directo de chat. Mantiene una conexión abierta todo el tiempo entre tu PC y el server para cosas en tiempo real, como un chat o un mapa en vivo.",
+        "respuesta": "websocket"
+    },
+    {
+        "id": 9,
+        "categoria": "Seguridad",
+        "leyenda": "La pantalla de bloqueo de Windows. Te pide usuario y contraseña. Si no tenés permisos de Administrador, no te deja entrar a ciertas carpetas de la app.",
+        "respuesta": "spring security"
+    },
+    {
+        "id": 10,
+        "categoria": "Seguridad",
+        "leyenda": "El 'Iniciar sesión con Google'. Te ahorra hacer el sistema de usuarios y delega la seguridad en un tercero.",
+        "respuesta": "oauth2 client"
+    },
+    {
+        "id": 11,
+        "categoria": "Seguridad",
+        "leyenda": "El patovica que lee códigos QR. Tu app no valida contraseñas, solo recibe un token (el QR), se fija si es válido y te deja pasar.",
+        "respuesta": "oauth2 resource server"
+    },
+    {
+        "id": 12,
+        "categoria": "Bases de Datos (SQL)",
+        "leyenda": "El oficinista del Excel. Vos le decís 'traeme al usuario 5' y él se pelea con la base de datos para traerte los datos armaditos en un Objeto de Java.",
+        "respuesta": "spring data jpa"
+    },
+    {
+        "id": 13,
+        "categoria": "Bases de Datos (SQL)",
+        "leyenda": "La consola de comandos (CMD). Cuando el oficinista es muy lento, usás esto para tirar consultas SQL a mano, crudas y rapidísimas.",
+        "respuesta": "jdbc api"
+    },
+    {
+        "id": 14,
+        "categoria": "Bases de Datos (SQL)",
+        "leyenda": "El sistema de autoguardado de la base de datos. Guarda el historial de todas las tablas que creaste para que en producción nadie rompa nada.",
+        "respuesta": "flyway migration"
+    },
+    {
+        "id": 15,
+        "categoria": "Bases de Datos (SQL)",
+        "leyenda": "El cable USB. Es el driver físico que permite que tu programa de Java se pueda enchufar a una base de datos PostgreSQL.",
+        "respuesta": "postgresql driver"
+    },
+    {
+        "id": 16,
+        "categoria": "Bases de Datos (SQL)",
+        "leyenda": "El pendrive temporal. Una base de datos que vive en la memoria RAM y se borra cuando apagás la app. Ideal para testing.",
+        "respuesta": "h2 database"
+    },
+    {
+        "id": 17,
+        "categoria": "Bases de Datos (NoSQL) y Caché",
+        "leyenda": "La memoria RAM de tu app. Guarda cosas que se consultan todo el tiempo rapidísimo, para no tener que ir a buscar al disco duro (base de datos) a cada rato.",
+        "respuesta": "spring data redis"
+    },
+    {
+        "id": 18,
+        "categoria": "Bases de Datos (NoSQL) y Caché",
+        "leyenda": "La carpeta de archivos sueltos. En vez de guardar datos en tablas estrictas, guarda documentos JSON sueltos. Excelente si tu información cambia de forma todo el tiempo.",
+        "respuesta": "spring data mongodb"
+    },
+    {
+        "id": 19,
+        "categoria": "Bases de Datos (NoSQL) y Caché",
+        "leyenda": "El buscador de Windows súper vitaminado. Indexa textos gigantes para que puedas buscar palabras clave en milisegundos, tipo el buscador de MercadoLibre.",
+        "respuesta": "spring data elasticsearch"
+    },
+    {
+        "id": 20,
+        "categoria": "Mensajería (Asincronismo)",
+        "leyenda": "El Correo Argentino. Vos le dejás un paquete (mensaje) y te olvidás. Él se encarga de que le llegue a otro sistema cuando el otro sistema esté libre para procesarlo.",
+        "respuesta": "spring for rabbitmq"
+    },
+    {
+        "id": 21,
+        "categoria": "Mensajería (Asincronismo)",
+        "leyenda": "El canal de Twitch. Tu app transmite eventos (ej: 'alguien compró algo') y otras 50 apps pueden estar 'suscriptas' escuchando eso para reaccionar al mismo tiempo.",
+        "respuesta": "spring for apache kafka"
+    },
+    {
+        "id": 22,
+        "categoria": "Tareas y Utilidades",
+        "leyenda": "El control de aduana. Revisa que el formulario que mandó el usuario no venga con un email falso o con el campo de DNI vacío antes de dejarlo entrar al sistema.",
+        "respuesta": "validation"
+    },
+    {
+        "id": 23,
+        "categoria": "Tareas y Utilidades",
+        "leyenda": "La Tarea Programada de Windows. Un proceso pesado que corre a la madrugada sin que nadie lo vea (ej: generar los recibos de sueldo de 10.000 empleados).",
+        "respuesta": "spring batch"
+    },
+    {
+        "id": 24,
+        "categoria": "Tareas y Utilidades",
+        "leyenda": "El despertador. Le decís 'ejecutá este código todos los martes a las 15:00' y el loco se encarga de dispararlo a esa hora exacta.",
+        "respuesta": "quartz scheduler"
+    },
+    {
+        "id": 25,
+        "categoria": "Tareas y Utilidades",
+        "leyenda": "El historial del navegador. Anota las respuestas a las preguntas frecuentes para que la próxima vez que pregunten lo mismo, responda al toque sin calcular nada.",
+        "respuesta": "spring cache abstraction"
+    },
+    {
+        "id": 26,
+        "categoria": "Tareas y Utilidades",
+        "leyenda": "El Outlook integrado. Literalmente lo que necesitás para que tu sistema mande correos de 'Recuperar contraseña' o facturas.",
+        "respuesta": "java mail sender"
+    },
+    {
+        "id": 27,
+        "categoria": "Tareas y Utilidades",
+        "leyenda": "Una máquina virtual descartable. Levanta una base de datos real en Docker solo para correr los tests automáticos, y cuando termina, la destruye.",
+        "respuesta": "testcontainers"
+    },
+    {
+        "id": 28,
+        "categoria": "Observabilidad y Monitoreo",
+        "leyenda": "El Administrador de Tareas (Ctrl+Alt+Supr). Te da URLs secretas para ver cuánta RAM usa tu app, si la base de datos está caída o cómo viene de CPU.",
+        "respuesta": "spring boot actuator"
+    },
+    {
+        "id": 29,
+        "categoria": "Observabilidad y Monitoreo",
+        "leyenda": "El grabador de las cámaras de seguridad. Chupa todas las métricas de monitoreo y las guarda en un historial para que veas si ayer a las 3 AM hubo un pico de uso.",
+        "respuesta": "prometheus"
+    },
+    {
+        "id": 30,
+        "categoria": "Observabilidad y Monitoreo",
+        "leyenda": "El número de seguimiento del correo. Si un usuario hace un clic y eso viaja por 5 microservicios distintos, esto le pone un ID para que sepas en cuál de los 5 falló.",
+        "respuesta": "distributed tracing"
+    },
+    {
+        "id": 31,
+        "categoria": "Microservicios (Spring Cloud)",
+        "leyenda": "La guía telefónica (Páginas Amarillas). En un sistema con 30 microservicios que cambian de IP todo el tiempo, se anotan acá para encontrarse entre ellos.",
+        "respuesta": "eureka discovery client"
+    },
+    {
+        "id": 32,
+        "categoria": "Microservicios (Spring Cloud)",
+        "leyenda": "El disco compartido en red (Disco Z:). Un solo lugar central donde guardás las contraseñas y configuraciones de todos tus microservicios.",
+        "respuesta": "config client"
+    },
+    {
+        "id": 33,
+        "categoria": "Microservicios (Spring Cloud)",
+        "leyenda": "El recepcionista del edificio. Todo el tráfico de internet entra por acá, y este chabón decide a qué microservicio (departamento) derivar la consulta.",
+        "respuesta": "gateway"
+    },
+    {
+        "id": 34,
+        "categoria": "Microservicios (Spring Cloud)",
+        "leyenda": "El teléfono directo. Te permite llamar a la API de otro microservicio escribiendo una simple interfaz en Java, como si estuvieras llamando a una función local.",
+        "respuesta": "openfeign"
+    },
+    {
+        "id": 35,
+        "categoria": "Microservicios (Spring Cloud)",
+        "leyenda": "La llave térmica de la casa (Circuit Breaker). Si un microservicio externo se cae, esto corta la conexión para que tu app no se quede colgada esperando y no explote todo.",
+        "respuesta": "resilience4j"
+    },
+    {
+        "id": 36,
+        "categoria": "Inteligencia Artificial",
+        "leyenda": "El enchufe directo a ChatGPT. Te da las herramientas para mandarle prompts al modelo desde tu código Java de forma nativa.",
+        "respuesta": "openai"
+    },
+    {
+        "id": 37,
+        "categoria": "Inteligencia Artificial",
+        "leyenda": "El ChatGPT offline. Te permite correr modelos de inteligencia artificial de forma local en tu propia PC sin gastar plata en APIs externas.",
+        "respuesta": "ollama"
+    },
+    {
+        "id": 38,
+        "categoria": "Inteligencia Artificial",
+        "leyenda": "La memoria del bot. Es un parche para PostgreSQL que le permite entender similitudes (ej: saber que 'perro' y 'gato' están cerca) para darle contexto a la IA.",
+        "respuesta": "pgvector vector database"
+    }
+]
+spring_dependencies_criollo.json
+Mostrando spring_dependencies_criollo.json.
